@@ -1,0 +1,36 @@
+{% extends 'news_app/base.html' %}
+
+{% block title %}Create Newsletter - News App{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Create a Curated Newsletter</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <p>
+            <label for="title"><strong>Newsletter Title:</strong></label><br>
+            <input type="text" id="title" name="title" required style="width: 100%; padding: 0.5rem; margin-top: 0.3rem;">
+        </p>
+
+        <p>
+            <label for="description"><strong>Description:</strong></label><br>
+            <textarea id="description" name="description" rows="3" required style="width: 100%; padding: 0.5rem; margin-top: 0.3rem;"></textarea>
+        </p>
+
+        <p>
+            <label><strong>Select Approved Articles to Include:</strong></label><br>
+            {% for article in articles %}
+                <label style="display: block; margin: 0.4rem 0;">
+                    <input type="checkbox" name="articles" value="{{ article.id }}">
+                    {{ article.title }} (By {{ article.author.username }})
+                </label>
+            {% empty %}
+                <p>No approved articles available to include.</p>
+            {% endfor %}
+        </p>
+
+        <button type="submit" class="btn btn-success">Publish Newsletter</button>
+        <a href="{% url 'dashboard' %}" class="btn btn-danger">Cancel</a>
+    </form>
+</div>
+{% endblock %}

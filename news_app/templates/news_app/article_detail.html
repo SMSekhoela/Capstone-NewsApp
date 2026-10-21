@@ -1,0 +1,42 @@
+{% extends 'news_app/base.html' %}
+
+{% block title %}{{ article.title }} - News App{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>{{ article.title }}</h2>
+    <p>
+        <small>
+            Author: <strong>{{ article.author.username }}</strong> 
+            {% if user.role == 'reader' %}
+                <a href="{% url 'toggle_journalist_sub' article.author.id %}">
+                    {% if article.author in user.subscribed_journalists.all %}(Unsubscribe Journalist){% else %}(Subscribe Journalist){% endif %}
+                </a>
+            {% endif %}
+            
+            {% if article.publisher %}
+                | Publisher: <strong>{{ article.publisher.name }}</strong>
+                {% if user.role == 'reader' %}
+                    <a href="{% url 'toggle_publisher_sub' article.publisher.id %}">
+                        {% if article.publisher in user.subscribed_publishers.all %}(Unsubscribe Publisher){% else %}(Subscribe Publisher){% endif %}
+                    </a>
+                {% endif %}
+            {% endif %}
+            | Published on {{ article.created_at|date:"F d, Y" }}
+        </small>
+    </p>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 1.5rem 0;">
+
+    <div style="font-size: 1.1rem; line-height: 1.8;">
+        {{ article.content|linebreaks }}
+    </div>
+
+    <br>
+    {% if user.role == 'editor' and not article.approved %}
+        <a href="{% url 'approve_article' article.id %}" class="btn btn-success">Approve & Broadcast Article</a>
+    {% endif %}
+    
+    <a href="{% url 'article_list' %}" class="btn">&larr; Back to Articles</a>
+</div>
+{% endblock %}

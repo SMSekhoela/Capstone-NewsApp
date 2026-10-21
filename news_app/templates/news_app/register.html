@@ -1,0 +1,31 @@
+{% extends 'news_app/base.html' %}
+
+{% block title %}Register - News App{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 2rem auto;">
+    <h2>Create an Account</h2>
+    <p>Sign up to join as a Reader, Journalist, or Editor.</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        {% for field in form %}
+            <p>
+                <label for="{{ field.id_for_label }}"><strong>{{ field.label }}:</strong></label><br>
+                {{ field }}
+                {% if field.help_text %}
+                    <br><small style="color: #666;">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <br><span style="color: red; font-size: 0.85rem;">{{ error }}</span>
+                {% endfor %}
+            </p>
+        {% endfor %}
+        <br>
+        <button type="submit" class="btn btn-success" style="width: 100%;">Create Account</button>
+    </form>
+
+    <br>
+    <p>Already have an account? <a href="{% url 'user_login' %}">Log in here</a>.</p>
+</div>
+{% endblock %}

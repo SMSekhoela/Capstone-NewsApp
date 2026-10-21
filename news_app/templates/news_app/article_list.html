@@ -1,0 +1,29 @@
+{% extends 'news_app/base.html' %}
+
+{% block title %}All Approved Articles - News App{% endblock %}
+
+{% block content %}
+<h2>Latest News Articles</h2>
+
+{% if articles %}
+    <div style="display: grid; gap: 1.5rem;">
+        {% for article in articles %}
+            <div class="card">
+                <h3><a href="{% url 'article_detail' article.id %}">{{ article.title }}</a></h3>
+                <p>
+                    <small>By <strong>{{ article.author.username }}</strong> 
+                    {% if article.publisher %} | Published under <strong>{{ article.publisher.name }}</strong>{% endif %}
+                    | {{ article.created_at|date:"F d, Y" }}
+                    </small>
+                </p>
+                <p>{{ article.content|truncatewords:30 }}</p>
+                <a href="{% url 'article_detail' article.id %}" class="btn">Read Full Article &rarr;</a>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card">
+        <p>No articles have been approved yet.</p>
+    </div>
+{% endif %}
+{% endblock %}

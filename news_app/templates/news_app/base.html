@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}News Network Application{% endblock %}</title>
+    
+    <!-- Link to static stylesheet -->
+    <link rel="stylesheet" href="{% static 'news_app/styles.css' %}">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Global Navigation Header -->
+    <header>
+        <div class="logo">
+            <a href="{% url 'dashboard' %}">📰 NewsApp</a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{% url 'article_list' %}">Articles</a></li>
+                <li><a href="{% url 'newsletter_list' %}">Newsletters</a></li>
+
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    
+                    {% if user.role == 'journalist' %}
+                        <li><a href="{% url 'create_article' %}" class="btn btn-success">+ Write Article</a></li>
+                    {% endif %}
+
+                    {% if user.role == 'journalist' or user.role == 'editor' %}
+                        <li><a href="{% url 'create_newsletter' %}">+ Create Newsletter</a></li>
+                    {% endif %}
+
+                    <li>
+                        <span class="user-role-badge">{{ user.role }}</span>
+                        <strong>{{ user.username }}</strong>
+                    </li>
+                    <li><a href="{% url 'user_logout' %}">Logout</a></li>
+                {% else %}
+                    <li><a href="{% url 'user_login' %}" class="btn">Login</a></li>
+                    <li><a href="{% url 'register' %}" class="btn btn-success">Register</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content Body -->
+    <main>
+        <!-- Django Messages Container -->
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="alert alert-{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <!-- Child Template Block -->
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; {% now "Y" %} News Network Application. Built for Independent Journalism.</p>
+    </footer>
+
+</body>
+</html>

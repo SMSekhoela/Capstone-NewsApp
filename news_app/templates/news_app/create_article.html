@@ -1,0 +1,34 @@
+{% extends 'news_app/base.html' %}
+
+{% block title %}Create Article - News App{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Submit a New Article</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <p>
+            <label for="title"><strong>Article Title:</strong></label><br>
+            <input type="text" id="title" name="title" required style="width: 100%; padding: 0.5rem; margin-top: 0.3rem;">
+        </p>
+
+        <p>
+            <label for="publisher"><strong>Associated Publisher (Optional):</strong></label><br>
+            <select id="publisher" name="publisher" style="width: 100%; padding: 0.5rem; margin-top: 0.3rem;">
+                <option value="">-- Independent Article (No Publisher) --</option>
+                {% for publisher in publishers %}
+                    <option value="{{ publisher.id }}">{{ publisher.name }}</option>
+                {% endfor %}
+            </select>
+        </p>
+
+        <p>
+            <label for="content"><strong>Content:</strong></label><br>
+            <textarea id="content" name="content" rows="10" required style="width: 100%; padding: 0.5rem; margin-top: 0.3rem;"></textarea>
+        </p>
+
+        <button type="submit" class="btn btn-success">Submit for Editor Review</button>
+        <a href="{% url 'dashboard' %}" class="btn btn-danger">Cancel</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends 'news_app/base.html' %}
+
+{% block title %}Dashboard - News App{% endblock %}
+
+{% block content %}
+<h2>Welcome, {{ user.username }}!</h2>
+<p>User Role: <span class="user-role-badge">{{ user.role }}</span></p>
+
+<!-- --------------------------------------------------------- -->
+<!-- READER DASHBOARD -->
+<!-- --------------------------------------------------------- -->
+{% if user.role == 'reader' %}
+    <div class="card">
+        <h3>Your Subscribed Articles</h3>
+        {% if articles %}
+            <ul>
+                {% for article in articles %}
+                    <li>
+                        <a href="{% url 'article_detail' article.id %}"><strong>{{ article.title }}</strong></a>
+                        by {{ article.author.username }}
+                        {% if article.publisher %}({{ article.publisher.name }}){% endif %}
+                        - <small>{{ article.created_at|date:"M d, Y" }}</small>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>You haven't subscribed to any journalists or publishers yet, or no approved articles exist.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>Available Newsletters</h3>
+        {% if newsletters %}
+            <ul>
+                {% for newsletter in newsletters %}
+                    <li>
+                        <strong>{{ newsletter.title }}</strong> - {{ newsletter.description }} 
+                        <small>(Curated by {{ newsletter.author.username }})</small>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No newsletters available.</p>
+        {% endif %}
+    </div>
+
+<!-- --------------------------------------------------------- -->
+<!-- JOURNALIST DASHBOARD -->
+<!-- --------------------------------------------------------- -->
+{% elif user.role == 'journalist' %}
+    <div style="margin-bottom: 1.5rem;">
+        <a href="{% url 'create_article' %}" class="btn btn-success">+ Create New Article</a>
+        <a href="{% url 'create_newsletter' %}" class="btn">+ Create Newsletter</a>
+    </div>
+
+    <div class="card">
+        <h3>Your Published & Submitted Articles</h3>
+        {% if articles %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for article in articles %}
+                        <tr>
+                            <td><a href="{% url 'article_detail' article.id %}">{{ article.title }}</a></td>
+                            <td>
+                                {% if article.approved %}
+                                    <span style="color: green; font-weight: bold;">Approved</span>
+                                {% else %}
+                                    <span style="color: orange; font-weight: bold;">Pending Approval</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ article.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <a href="{% url 'delete_article' article.id %}" class="btn btn-danger" onclick="return confirm('Delete this article?');">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>You haven't authored any articles yet.</p>
+        {% endif %}
+    </div>
+
+<!-- --------------------------------------------------------- -->
+<!-- EDITOR DASHBOARD -->
+<!-- --------------------------------------------------------- -->
+{% elif user.role == 'editor' %}
+    <div class="card">
+        <h3 style="color: #e67e22;">Articles Pending Approval</h3>
+        {% if pending_articles %}
+            <ul>
+                {% for article in pending_articles %}
+                    <li style="margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;">
+                        <strong>{{ article.title }}</strong> by {{ article.author.username }}
+                        <br>
+                        <small>Submitted: {{ article.created_at|date:"M d, Y H:i" }}</small>
+                        <br><br>
+                        <a href="{% url 'article_detail' article.id %}" class="btn">Review Content</a>
+                        <a href="{% url 'approve_article' article.id %}" class="btn btn-success">Approve & Broadcast (Email + X)</a>
+                        <a href="{% url 'delete_article' article.id %}" class="btn btn-danger" onclick="return confirm('Reject and delete article?');">Reject / Delete</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>There are no pending articles to review right now.</p>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}
