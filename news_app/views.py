@@ -1,3 +1,9 @@
+"""Views for the news application.
+
+This module defines the request handlers for authentication, article management,
+subscriptions, dashboards, and newsletters.
+"""
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -14,7 +20,11 @@ from .models import Article, Publisher, Newsletter, CustomUser
 # ---------------------------------------------------------
 
 def user_login(request):
-    """Authenticate a user and redirect them to the dashboard on success."""
+    """Log in a user and redirect them to the dashboard.
+
+    :param request: The HTTP request object.
+    :return: A rendered login page or a redirect to the dashboard.
+    """
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -28,7 +38,11 @@ def user_login(request):
 
 
 def register(request):
-    """Create a new user account and automatically sign the user in."""
+    """Create a new account and sign the user in.
+
+    :param request: The HTTP request object.
+    :return: A rendered registration form or a redirect to the dashboard.
+    """
     if request.user.is_authenticated:
         return redirect('dashboard')
 
@@ -50,7 +64,11 @@ def register(request):
 
 @login_required
 def user_logout(request):
-    """Log the current user out of the session and redirect to login."""
+    """Log the current user out and redirect to the login page.
+
+    :param request: The HTTP request object.
+    :return: A redirect to the login view.
+    """
     logout(request)
     messages.info(request, "You have been logged out.")
     return redirect('user_login')
@@ -58,7 +76,11 @@ def user_logout(request):
 
 @login_required
 def dashboard(request):
-    """Render the role-specific dashboard for readers, journalists, or editors."""
+    """Display the appropriate dashboard for the authenticated user.
+
+    :param request: The HTTP request object.
+    :return: A rendered dashboard page with role-specific content.
+    """
     user = request.user
     context = {'role': user.role}
 
@@ -87,14 +109,23 @@ def dashboard(request):
 
 @login_required(login_url='user_login')
 def article_list(request):
-    """Display the approved article feed for authenticated users."""
+    """Show the list of approved articles for authenticated users.
+
+    :param request: The HTTP request object.
+    :return: A rendered article list page.
+    """
     articles = Article.objects.filter(approved=True).order_by('-created_at')
     return render(request, 'news_app/article_list.html', {'articles': articles})
 
 
 @login_required(login_url='user_login')
 def article_detail(request, pk):
-    """Show a single article and block unapproved content from readers."""
+    """Display one article while protecting unapproved content.
+
+    :param request: The HTTP request object.
+    :param pk: The primary key of the article.
+    :return: A rendered article detail page.
+    """
     article = get_object_or_404(Article, pk=pk)
     if not article.approved and (not request.user.is_authenticated or request.user.role == 'reader'):
         raise PermissionDenied("This article has not been approved yet.")
@@ -103,7 +134,11 @@ def article_detail(request, pk):
 
 @login_required
 def create_article(request):
-    """Allow journalists to submit a new article for editor approval."""
+    """Allow journalists to create and submit an article for review.
+
+    :param request: The HTTP request object.
+    :return: A redirect to the dashboard or a rendered article form.
+    """
     if request.user.role != 'journalist':
         raise PermissionDenied("Only journalists can create articles.")
 
@@ -136,7 +171,12 @@ def create_article(request):
 
 @login_required
 def approve_article(request, pk):
-    """Approve an article and trigger subscriber notifications and social sharing."""
+    """Approve an article and notify subscribers.
+
+    :param request: The HTTP request object.
+    :param pk: The primary key of the article.
+    :return: A redirect to the dashboard.
+    """
     if request.user.role != 'editor':
         raise PermissionDenied("Only editors can approve articles.")
 
@@ -150,7 +190,12 @@ def approve_article(request, pk):
 
 @login_required
 def delete_article(request, pk):
-    """Delete an article if the current user is the author or an editor."""
+    """Delete an article if the user is allowed to do so.
+
+    :param request: The HTTP request object.
+    :param pk: The primary key of the article.
+    :return: A redirect to the dashboard.
+    """
     article = get_object_or_404(Article, pk=pk)
 
     if request.user.role != 'editor' and article.author != request.user:
@@ -167,7 +212,12 @@ def delete_article(request, pk):
 
 @login_required
 def toggle_publisher_subscription(request, publisher_id):
-    """Toggle a reader's subscription status for a publisher."""
+    """Toggle a reader subscription to a publisher.
+
+    :param request: The HTTP request object.
+    :param publisher_id: The publisher identifier.
+    :return: A redirect to the dashboard.
+    """
     if request.user.role != 'reader':
         raise PermissionDenied("Only readers can manage subscriptions.")
 
@@ -184,7 +234,12 @@ def toggle_publisher_subscription(request, publisher_id):
 
 @login_required
 def toggle_journalist_subscription(request, journalist_id):
-    """Toggle a reader's subscription status for a specific journalist."""
+    """Toggle a reader subscription to a journalist.
+
+    :param request: The HTTP request object.
+    :param journalist_id: The journalist identifier.
+    :return: A redirect to the dashboard.
+    """
     if request.user.role != 'reader':
         raise PermissionDenied("Only readers can manage subscriptions.")
 
@@ -205,14 +260,22 @@ def toggle_journalist_subscription(request, journalist_id):
 
 @login_required
 def newsletter_list(request):
-    """Display all available newsletters in reverse chronological order."""
+    """List newsletters in reverse chronological order.
+
+    :param request: The HTTP request object.
+    :return: A rendered newsletter list page.
+    """
     newsletters = Newsletter.objects.all().order_by('-created_at')
     return render(request, 'news_app/newsletter_list.html', {'newsletters': newsletters})
 
 
 @login_required
 def create_newsletter(request):
-    """Allow journalists or editors to create a newsletter from approved articles."""
+    """Create a newsletter from approved articles.
+
+    :param request: The HTTP request object.
+    :return: A redirect to the dashboard or a rendered newsletter form.
+    """
     if request.user.role not in ['journalist', 'editor']:
         raise PermissionDenied("Only journalists and editors can create newsletters.")
 
