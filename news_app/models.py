@@ -33,8 +33,8 @@ class CustomUser(AbstractUser):
     def save(self, *args, **kwargs):
         """Save the user and keep the role-based group assignment consistent.
 
-        :param *args: Positional arguments for the parent save method.
-        :param **kwargs: Keyword arguments for the parent save method.
+        :param args: Positional arguments for the parent save method.
+        :param kwargs: Keyword arguments for the parent save method.
         :return: None
         """
         if self.role == 'journalist':
