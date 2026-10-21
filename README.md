@@ -1,84 +1,127 @@
-# News Application (Django)
+# News Application
 
-This repository contains a Django-based News Application built for the Level 2 Capstone Project. This `README` is targeted at code reviewers and contains quick setup, testing, and deployment notes.
+## Project Description
 
-**Project**: News Application
+This project is a Django-based news application designed to manage news articles, subscriptions, newsletters, and role-based user access. It supports readers, journalists, and editors, with article approval workflows and a REST API layer for future integrations.
 
-**Quick Summary**
-- Django backend with a custom user model and REST endpoints via DRF.
-- Default database: MySQL (configurable to SQLite via environment variable).
-- JWT + session authentication supported.
+## Local Setup (Virtual Environment)
 
-**Features**
-- Create/read/update/delete articles
-- User registration and authentication
-- Newsletter creation and listing
-- REST API endpoints (see `news_app/api_views.py` and `news_app/serializers.py`)
-
-**Prerequisites**
-- Python 3.11+ (match `requirements.txt`)
-- pip
-- MySQL server (optional; SQLite available)
-
-**Reviewer Quick-Start (local)**
-1. Create and activate venv:
+1. Open a terminal in the project root.
+2. Create a virtual environment:
 
 ```bash
 python -m venv .venv
-# Windows PowerShell
+```
+
+3. Activate the virtual environment:
+
+### Windows (PowerShell)
+```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
-2. Install dependencies:
+### macOS/Linux
+```bash
+source .venv/bin/activate
+```
+
+4. Install project dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Copy environment file and set values:
+5. Create a local environment file for secrets and settings:
 
 ```bash
-# PowerShell
-Copy-Item .env.example .env
+copy .env.example .env
 ```
 
-Then edit `.env` to set `SECRET_KEY`, database credentials (`DB_NAME`, `DB_USER`, `DB_PASSWORD`, etc.), and `USE_MYSQL` if you want SQLite.
+If `.env.example` does not exist, create a `.env` file manually and define the required variables.
 
-4. Apply migrations and create a superuser:
+6. Apply migrations:
 
 ```bash
 python manage.py migrate
-python manage.py createsuperuser
 ```
 
-5. Run the development server:
+7. Start the development server:
 
 ```bash
 python manage.py runserver
 ```
 
-6. Run tests:
+The app should be available locally at:
 
-```bash
-python manage.py test
+```text
+http://127.0.0.1:8000/
 ```
 
-**Environment variables**
-- See `.env.example` for all variables. Key variables:
-  - `SECRET_KEY`
-  - `DEBUG`
-  - `USE_MYSQL` (set `false` to use SQLite)
-  - `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`
+## Docker Setup
 
-**Notes for reviewers**
-- Settings load from `.env` in `news_project/settings.py`.
-- By default `EMAIL_BACKEND` is console; change in production.
-- When deploying: set `DEBUG=False`, set secure `SECRET_KEY`, and configure `ALLOWED_HOSTS`.
-- Run `python manage.py collectstatic` when serving static files in production.
+Build the Docker image from the project root:
 
-**Files of interest**
-- `news_app/models.py`, `news_app/views.py`, `news_app/serializers.py`, `news_app/urls.py`
-- `news_project/settings.py` (configuration)
+```bash
+docker build -t news-app .
+```
 
-**Contact**
-For questions, leave a review comment or contact the author.
+Run the container:
+
+```bash
+docker run -d -p 8000:8000 --name news-app-container news-app
+```
+
+Open the app in a browser at:
+
+```text
+http://localhost:8000/
+```
+
+To stop the container:
+
+```bash
+docker stop news-app-container
+```
+
+To remove it:
+
+```bash
+docker rm news-app-container
+```
+
+## Environment Variables / Secrets
+
+Never store real passwords, secret keys, API tokens, or other credentials in a public repository.
+
+Use a local `.env` file for development and a secure secrets manager or platform environment configuration in production.
+
+Example `.env` file:
+
+```env
+SECRET_KEY=your_secret_key_here
+DEBUG=True
+USE_MYSQL=False
+DB_NAME=db.sqlite3
+DB_USER=
+DB_PASSWORD=
+DB_HOST=
+DB_PORT=
+```
+
+### Recommended practices
+- Keep `.env` local and add it to `.gitignore`.
+- Use environment variables provided by your hosting platform or Docker runtime in deployment.
+- Do not commit real credentials to Git or any public repository.
+- Use `docker run --env-file .env ...` if you want to load environment variables into the container without embedding secrets in the Dockerfile.
+
+Example:
+
+```bash
+docker run -d -p 8000:8000 --env-file .env --name news-app-container news-app
+```
+
+## Notes
+
+- The project can run with SQLite or MySQL depending on the `USE_MYSQL` setting and the values in the environment file.
+- For production, set `DEBUG=False`, define a secure `SECRET_KEY`, and configure allowed hosts correctly.
+
