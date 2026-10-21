@@ -1,9 +1,19 @@
+"""Database models for the news application.
+
+This module defines the user roles, publishers, articles, and newsletters used by
+the application.
+"""
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group
 
 
 class CustomUser(AbstractUser):
-    """Custom user model that supports readers, journalists, and editors."""
+    """Represent a user with a role in the news platform.
+
+    :param AbstractUser: Base Django user model.
+    :return: A custom user instance for a reader, journalist, or editor.
+    """
 
     ROLE_CHOICES = (
         ('reader', 'Reader'),
@@ -21,7 +31,12 @@ class CustomUser(AbstractUser):
     )
 
     def save(self, *args, **kwargs):
-        """Save the user and ensure role-based group assignment and subscriptions remain valid."""
+        """Save the user and keep the role-based group assignment consistent.
+
+        :param *args: Positional arguments for the parent save method.
+        :param **kwargs: Keyword arguments for the parent save method.
+        :return: None
+        """
         if self.role == 'journalist':
             super().save(*args, **kwargs)
             self.subscribed_publishers.clear()
@@ -34,7 +49,11 @@ class CustomUser(AbstractUser):
 
 
 class Publisher(models.Model):
-    """Represents a news publisher that can have assigned editors and journalists."""
+    """Represent a news publisher with assigned editors and journalists.
+
+    :param models.Model: Django base model class.
+    :return: A publisher instance.
+    """
 
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -46,12 +65,19 @@ class Publisher(models.Model):
     )
 
     def __str__(self):
-        """Return a readable publisher name."""
+        """Return the publisher name for display.
+
+        :return: The publisher's name.
+        """
         return self.name
 
 
 class Article(models.Model):
-    """Stores published or pending news content submitted by journalists."""
+    """Store a news article submitted by a journalist.
+
+    :param models.Model: Django base model class.
+    :return: An article instance.
+    """
 
     title = models.CharField(max_length=255)
     content = models.TextField()
@@ -65,12 +91,19 @@ class Article(models.Model):
     approved = models.BooleanField(default=False)
 
     def __str__(self):
-        """Return the article title for display in the admin and shell."""
+        """Return the article title for readable display.
+
+        :return: The article title.
+        """
         return self.title
 
 
 class Newsletter(models.Model):
-    """Represents a curated collection of approved articles created by a user."""
+    """Represent a curated collection of approved articles.
+
+    :param models.Model: Django base model class.
+    :return: A newsletter instance.
+    """
 
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -81,5 +114,8 @@ class Newsletter(models.Model):
     articles = models.ManyToManyField(Article, related_name='newsletters')
 
     def __str__(self):
-        """Return the newsletter title."""
+        """Return the newsletter title.
+
+        :return: The newsletter title.
+        """
         return self.title
